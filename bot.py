@@ -43,13 +43,6 @@ def check_application_PB(user_id):
     data = get_data_for_user(user_id)
     mode = data["mode"]
     held_raw = data["cities_held"]
-    data = get_data_for_user(user_id)
-    if data and data.get("service_error") == 1:
-        bot.send_message(
-            user_id,
-            "⚠️ Соединение с сервером временно пропадало. Игра продолжена."
-        )
-        update_row_value(user_id, "service_error", 0)
 
     held = safe_load_list(held_raw)
 
