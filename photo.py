@@ -1,8 +1,16 @@
-class City:
-    def __init__(self, name, photo_path, map_path):
+class ImageEntity:
+    def __init__(self, name, photo_path):
         self.name = name
         self.photo_path = photo_path
+
+
+class City(ImageEntity):
+    def __init__(self, name, photo_path, map_path):
+        super().__init__(name, photo_path)
         self.map_path = map_path
+
+class Gerb(ImageEntity):
+    pass
 
 cities = {
     "Москва": City("Москва", "Photo/Images/Moscow.jpg", "Photo/Maps/MoscowMap.jpg"),
@@ -19,7 +27,7 @@ cities = {
     "Омск": City("Омск", "Photo/Images/Omsk.jpg", "Photo/Maps/OmskMap.jpg"),
     "Самара": City("Самара", "Photo/Images/Samara.jpg", "Photo/Maps/SamaraMap.jpg"),
     "Уфа": City("Уфа", "Photo/Images/Ufa.jpg", "Photo/Maps/UfaMap.jpg"),
-    "Красноярск": City("Красноярск", "Photo/Images/Krasnoyarsk.jpeg", "Photo/Maps/KrasnoyarskMap.jpg"),
+    "Красноярск": City("Красноярск", "Photo/Images/Krasnoyarsk.jpg", "Photo/Maps/KrasnoyarskMap.jpg"),
     "Пермь": City("Пермь", "Photo/Images/Perm.jpg", "Photo/Maps/PermMap.jpg"),
     "Воронеж": City("Воронеж", "Photo/Images/Voronezh.jpg", "Photo/Maps/VoronezhMap.jpg"),
     "Волгоград": City("Волгоград", "Photo/Images/Volgograd.jpg", "Photo/Maps/VolgogradMap.jpg"),
@@ -28,6 +36,28 @@ cities = {
     "Ижевск": City("Ижевск", "Photo/Images/Izhevsk.jpg", "Photo/Maps/IzhevskMap.jpg"),
     "Барнаул": City("Барнаул", "Photo/Images/Barnaul.jpg", "Photo/Maps/BarnaulMap.jpg"),
     "Ульяновск": City("Ульяновск", "Photo/Images/Ulyanovsk.jpg", "Photo/Maps/UlyanovskMap.jpg"),
-    "Иркутск": City("Иркутск", "Photo/Images/Irkutsk.JPG", "Photo/Maps/IrkutskMap.jpg"),
-    "Тюмень": City("Тюмень", "Photo/Images/Tyumen.jpg", "Photo/Maps/TyumenMap.jpg")
+    "Иркутск": City("Иркутск", "Photo/Images/Irkutsk.png", "Photo/Maps/IrkutskMap.jpg"),
+    "Тюмень": City("Тюмень", "Photo/Images/Tyumen.jpg", "Photo/Maps/TyumenMap.jpg"),
+    "Кемерово": City("Кемерово", "Photo/Images/Kemerovo.jpg", "Photo/Maps/KemerovoMap.jpg"),
+    "Рязань": City("Рязань", "Photo/Images/Ryazan.jpg", "Photo/Maps/RyazanMap.jpg"),
+    "Томск": City("Томск", "Photo/Images/Tomsk.jpg", "Photo/Maps/TomskMap.jpg"),
+    "Астрахань": City("Астрахань", "Photo/Images/Astrakhan.jpg", "Photo/Maps/AstrakhanMap.jpg"),
+    "Пенза": City("Пенза", "Photo/Images/Penza.jpg", "Photo/Maps/PenzaMap.jpg"),
+    "Норильск": City("Норильск", "Photo/Images/Norilsk.jpg", "Photo/Maps/NorilskMap.jpg"),
+    "Набережные Челны": City("Набережные Челны", "Photo/Images/Naberezhnye_Chelny.jpg",
+                             "Photo/Maps/Naberezhnye_ChelnyMap.jpg"),
+}
+
+gerbs = {
+    "Москва": Gerb("Москва", "Photo/Gerbs/Moscow.jpeg"),
+    "Санкт Петербург": Gerb("Санкт Петербург", "Photo/Gerbs/Saint_Petersburg.jpg"),
+    "Краснодар": Gerb("Краснодар", "Photo/Gerbs/Krasnodar.jpg"),
+    "Нижний Новгород": Gerb("Нижний Новгород", "Photo/Gerbs/Nizhniy_Novgorod.jpg"),
+    "Самара": Gerb("Самара", "Photo/Gerbs/Samara.jpg"),
+    "Омск": Gerb("Омск", "Photo/Gerbs/Omsk.jpg"),
+    "Челябинск": Gerb("Челябинск", "Photo/Gerbs/Chelyabinsk.jpg"),
+    "Казань": Gerb("Казань", "Photo/Gerbs/Kazan.jpg"),
+    "Екатеринбург": Gerb("Екатеринбург", "Photo/Gerbs/Ekaterinburg.jpg"),
+    "Новосибирск": Gerb("Новосибирск", "Photo/Gerbs/Novosibirsk.jpg")
+
 }
