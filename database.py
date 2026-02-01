@@ -51,6 +51,7 @@ def create_table(table_name):
                 f'hint TEXT DEFAULT None, ' \
                 f'right_answer TEXT DEFAULT None, ' \
                 f'rating_finished INTEGER DEFAULT 0, ' \
+                f'state TEXT DEFAULT menu,' \
                 f'score INTEGER DEFAULT 1, ' \
                 f'glasses INTEGER DEFAULT 0, ' \
                 f'most_points INTEGER DEFAULT 0,' \
@@ -75,10 +76,11 @@ def get_all_rows(table_name):
             "hint": row[6],
             "right_answer": row[7],
             "rating_finished": row[8],
-            "score": row[9],
-            "glasses": row[10],
-            "most_points": row[11],
-            "service_error": row[12]
+            "state": row[9],
+            "score": row[10],
+            "glasses": row[11],
+            "most_points": row[12],
+            "service_error": row[13]
         }
 
     return users
@@ -131,16 +133,17 @@ def update_row_value(user_id, column_name, new_value):
 # Функция для получения данных для указанного пользователя
 def get_data_for_user(user_id):
     if is_value_in_table(DB_TABLE_USERS_NAME, "user_id", user_id):
-        sq1_query = (f"SELECT user_id, user_name, mode, submode, cities_held, hint, right_answer, rating_finished, score, "
-                     f"glasses, most_points, service_error FROM {DB_TABLE_USERS_NAME} WHERE user_id = ? limit 1")
+        sq1_query = (f"SELECT user_id, user_name, mode, submode, cities_held, hint, right_answer, rating_finished, "
+                     f"state, score, glasses, most_points, service_error FROM {DB_TABLE_USERS_NAME} "
+                     f"WHERE user_id = ? limit 1")
         row = execute_selection_query(sq1_query, [user_id])[0]
         return {"user_id": row[0], "user_name": row[1], "mode": row[2], "submode": row[3], "cities_held": row[4],
-                "hint": row[5], "right_answer": row[6], "rating_finished": row[7], "score": row[8], "glasses": row[9],
-                "most_points": row[10], "service_error": row[11]}
+                "hint": row[5], "right_answer": row[6], "rating_finished": row[7], "state": row[8], "score": row[9],
+                "glasses": row[10], "most_points": row[11], "service_error": row[12]}
     else:
         logging.info(f"DATABASE: Пользователь с id = {user_id} не найден")
         return {"user_id": "", "user_name": "", "mode": "", "submode": "", "cities_held": "", "hint": "",
-                "right_answer": "", "rating_finished": "", "score": "", "glasses": "", "most_points": "",
+                "right_answer": "", "rating_finished": "", "state": "", "score": "", "glasses": "", "most_points": "",
                 "service_error": ""}
 
 # Функция обнуляет значение для указанного пользователя
@@ -148,8 +151,8 @@ def reset_table_value(user_id):
     if is_value_in_table(DB_TABLE_USERS_NAME, "user_id", user_id):
         sql_query = (
             f"UPDATE {DB_TABLE_USERS_NAME} "
-            f"SET mode = NULL, submode == NULL, cities_held = NULL, hint = NULL, right_answer = NULL, rating_finished = 0, "
-            f"score = 1, glasses = 0 WHERE user_id = ?"
+            f"SET mode = NULL, submode = NULL, cities_held = NULL, hint = NULL, right_answer = NULL, rating_finished = 0, "
+            f"state = 'menu', score = 1, glasses = 0 WHERE user_id = ?"
         )
         execute_query(sql_query, [user_id])
     else:
