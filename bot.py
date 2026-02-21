@@ -62,12 +62,13 @@ def next_round(uid):
         update_row_value(uid, "right_answer", None)
         return None
 
-    photo, hint1, options, answer = result
+    photo, hint1, options, answer, information = result
 
     held.append(answer)
     update_row_value(uid, "cities_held", json.dumps(held, ensure_ascii=False))
     update_row_value(uid, "right_answer", answer)
     update_row_value(uid, "hint", hint1)
+    update_row_value(uid, "documentation", information)
 
     return photo, options
 
@@ -78,26 +79,34 @@ def send_question(uid, text, separation, callback_id):
         bot.answer_callback_query(callback_id)
         return
 
+    if get_data_for_user(uid)["score"] > 1:
+        update_row_value(uid, "gauge", "Верно✅")
+
     photo, options = result
     data = get_data_for_user(uid)
 
     buttons = options + (["💡 Подсказка"] if data["mode"] == "City" else []) + ["🏁 Завершить"]
 
+    if not data["gauge"] is None:
+        indicator = f'{data["gauge"]}\n{data["score"]}'
+    else:
+        indicator = f"{data['score']}"
+
     bot.send_photo(
         uid,
         photo,
-        caption=f"{data['score']}. {text}",
+        caption=f"{indicator}. {text}",
         reply_markup=create_markup(buttons, separation)
     )
     bot.answer_callback_query(callback_id)
 
 def start_game(callback, mode, submode=None):
     uid = callback.from_user.id
-    update_row_value(uid, "mode", mode)
+
     update_row_value(uid, "submode", submode)
     update_row_value(uid, "score", 1)
     update_row_value(uid, "cities_held", "[]")
-    update_row_value(uid, "state", "game")
+    update_row_value(uid, "state", "Game")
 
     titles = {
         "City": "Укажите верный город!",
@@ -122,7 +131,7 @@ def start(message):
     if not is_value_in_table(DB_TABLE_USERS_NAME, "user_id", uid):
         initial_insertion([uid, message.from_user.first_name])
 
-    update_row_value(uid, "state", "menu")
+    reset_table_value(uid)
 
     bot.send_message(
         message.from_user.id,
@@ -197,26 +206,34 @@ def documentation(callback):
 @bot.callback_query_handler(func=lambda c: c.data == 'ℹ️ О режимах')
 def documentation(callback):
     uid = callback.from_user.id
+    mode = get_data_for_user(uid)["mode"]
 
     if not check_user(callback):
         return
+    if mode == "City":
+        bot.send_message(uid, text=f"Режимы городов:\n"
+                                   f"🎮 Аркадный — в этом режиме игра имеет завершение. В ходе прохождения игры вы сможете увидеть уникальный город, который в раунде не повторится. Количество попыток не ограничены, однако очки рейтинга не будут учитываться.\n"
+                                   f"🏆 Рейтинг — бесконечный режим. В этом режиме не предоставляется возможность совершить ошибки. За каждое успешное действие начисляются рейтинговые очки. Режим предназначен для соревнований между игроками.")
+        bot.answer_callback_query(callback.id)
+        return
+    elif mode == "Attractions":
+        bot.send_message(uid, text=f"Режимы достопримечательности:\n"
+                                   f"🎮 Аркадный — в этом режиме вопросы идут последовательно без географическо-исторической справки и интересных фактов. Режим предназначен для укрепления знаний о достопримечательности.\n"
+                                   f"✈️ Экскурсионный — учебный режим, в котором при каждом верном ответе будет давать интересные факты, состоящие из исторических и географических сведений о пройденной достопримечательности. Таким образом, можно получить много интересной информации о различных уголках России.")
+        bot.answer_callback_query(callback.id)
+        return
 
-    bot.send_message(uid, text=f"Режимы:\n"
-                 f"🎮 Аркадный — в этом режиме игра имеет завершение. В ходе прохождения игры вы сможете увидеть уникальный город, который в раунде не повторится. Количество попыток не ограничены, однако очки рейтинга не будут учитываться.\n"
-                 f"🏆 Рейтинг — бесконечный режим. В этом режиме не предоставляется возможность совершить ошибки. За каждое успешное действие начисляются рейтинговые очки. Режим предназначен для соревнований между игроками.")
-    bot.answer_callback_query(callback.id)
-
-# -------------------- ЗАПУСК РЕЖИМОВ --------------------
+    # -------------------- ЗАПУСК РЕЖИМОВ --------------------
 
 @bot.callback_query_handler(func=lambda c: c.data == "🏙 Города")
 def city_menu(callback):
     uid = callback.from_user.id
     state = get_data_for_user(uid)["state"]
 
+    update_row_value(uid, "mode", "City")
     if not check_user(callback):
         return
-
-    if state != "menu":
+    if state != "Menu":
         bot.answer_callback_query(callback.id, "Сначала завершите текущую игру!", show_alert=True)
         return
 
@@ -233,14 +250,19 @@ def city_menu(callback):
 def arcade(callback):
     uid = callback.from_user.id
     state = get_data_for_user(uid)["state"]
+    mode = get_data_for_user(uid)["mode"]
 
     if not check_user(callback):
         return
 
-    if state != "menu":
+    if state != "Menu":
         bot.answer_callback_query(callback.id, "Сначала завершите текущую игру!", show_alert=True)
         return
-    start_game(callback, "City", "Arcade")
+
+    if mode == "City":
+        start_game(callback, "City", "Arcade")
+    elif mode == "Attractions":
+        start_game(callback, "Attractions", "Arcade")
 
 
 @bot.callback_query_handler(func=lambda c: c.data == "🏆 Рейтинг")
@@ -251,22 +273,63 @@ def rating(callback):
     if not check_user(callback):
         return
 
-    if state != "menu":
+    if state != "Menu":
         bot.answer_callback_query(callback.id, "Сначала завершите текущую игру!", show_alert=True)
         return
 
     start_game(callback, "City", "Rating")
 
-
-@bot.callback_query_handler(func=lambda c: c.data == "🛡 Гербы")
-def gerbs(callback):
+@bot.callback_query_handler(func=lambda c: c.data == "✈️ Экскурсионный")
+def sightseeing_tour(callback):
     uid = callback.from_user.id
     state = get_data_for_user(uid)["state"]
 
     if not check_user(callback):
         return
 
-    if state != "menu":
+    if state != "Menu":
+        bot.answer_callback_query(callback.id, "Сначала завершите текущую игру!", show_alert=True)
+        return
+
+    start_game(callback, "Attractions", "Sightseeing_tour")
+
+@bot.callback_query_handler(func=lambda c: c.data == "💼Следующий вопрос")
+def next_question(callback):
+    uid = callback.from_user.id
+    data = get_data_for_user(uid)
+
+    if not check_user(callback):
+        return
+
+    if data["state"] != "Game":
+        bot.answer_callback_query(callback.id, "Сначала выберите режим в меню!", show_alert=True)
+        return
+
+    texts = {
+        "City": "Укажите верный город!",
+        "Gerb": "Укажите верный герб!",
+        "Attractions": "Укажите верную достопримечательность!"
+    }
+
+    separation = {
+        "City": 2,
+        "Gerb": 2,
+        "Attractions": 1
+    }
+
+    send_question(uid, texts[data["mode"]], separation[data["mode"]],  callback.id)
+
+@bot.callback_query_handler(func=lambda c: c.data == "🛡 Гербы")
+def gerbs(callback):
+    uid = callback.from_user.id
+    state = get_data_for_user(uid)["state"]
+
+    update_row_value(uid, "mode", "Gerb")
+
+    if not check_user(callback):
+        return
+
+    if state != "Menu":
         bot.answer_callback_query(callback.id, "Сначала завершите текущую игру!", show_alert=True)
         return
 
@@ -278,14 +341,21 @@ def attractions(callback):
     uid = callback.from_user.id
     state = get_data_for_user(uid)["state"]
 
+    update_row_value(uid, "mode", "Attractions")
+
     if not check_user(callback):
         return
-
-    if state != "menu":
+    if state != "Menu":
         bot.answer_callback_query(callback.id, "Сначала завершите текущую игру!", show_alert=True)
         return
 
-    start_game(callback, "Attractions")
+    bot.edit_message_text(
+        "Выберите режим:",
+        callback.message.chat.id,
+        callback.message.message_id,
+        reply_markup=create_markup(["🎮 Аркадный", "✈️ Экскурсионный", "ℹ️ О режимах", "🚪 Выйти"], 1)
+    )
+    bot.answer_callback_query(callback.id)
 
 
 @bot.callback_query_handler(func=lambda c: c.data == "🎲 Случайный режим")
@@ -296,7 +366,7 @@ def random_mode(callback):
     if not check_user(callback):
         return
 
-    if state != "menu":
+    if state != "Menu":
         bot.answer_callback_query(callback.id, "Сначала завершите текущую игру!", show_alert=True)
         return
 
@@ -317,6 +387,10 @@ def random_mode(callback):
     if mode == "City":
         submode_names = {"Arcade": "Аркадный", "Rating": "Рейтинг"}
         bot.send_message(uid, f"🎲 Случайный режим! Выпал режим: {mode_names[mode]} — {submode_names.get(submode, submode)}")
+    elif mode == "Attractions":
+        submode_names = {"Arcade": "Аркадный", "Sightseeing_tour": "Экскурсионный"}
+        bot.send_message(uid,
+                         f"🎲 Случайный режим! Выпал режим: {mode_names[mode]} — {submode_names.get(submode, submode)}")
     else:
         bot.send_message(uid, f"🎲 Случайный режим! Выпал режим: {mode_names.get(mode, mode)}")
 
@@ -383,7 +457,7 @@ def answers(callback):
     if not check_user(callback):
         return
 
-    if state != "game":
+    if state != "Game":
         bot.answer_callback_query(callback.id, "Сначала выберите режим в меню!", show_alert=True)
         return
 
@@ -394,6 +468,15 @@ def answers(callback):
 
         if data["mode"] == "City" and data["submode"] == "Rating":
             update_row_value(uid, "glasses", data["glasses"] + 10)
+
+        if data["mode"] == "Attractions" and data["submode"] == "Sightseeing_tour":
+
+            bot.send_message(
+                uid,
+                f'{data["documentation"]}',
+                reply_markup=create_markup(["💼Следующий вопрос", "🚪 Выйти"], 1))
+            bot.answer_callback_query(callback.id)
+            return
 
         texts = {
             "City": "Укажите верный город!",
@@ -414,12 +497,9 @@ def answers(callback):
             if data["glasses"] > data.get("most_points", 0):
                 update_row_value(uid, "most_points", data["glasses"])
 
-            bot.send_message(
-                uid,
-                f"Игра окончена!\nВерный ответ: {data['right_answer']}\nОчки: {data['glasses']}\n",
-                reply_markup=create_markup(["🚪 Выйти"])
-            )
+            finish(callback)
             bot.answer_callback_query(callback.id)
+            return
         else:
             bot.send_message(uid, "❌ Неверно. Попробуйте ещё раз.")
             bot.answer_callback_query(callback.id)

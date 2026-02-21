@@ -45,16 +45,17 @@ def create_table(table_name):
                 f'(id INTEGER PRIMARY KEY, ' \
                 f'user_id INTEGER, ' \
                 f'user_name TEXT, ' \
+                f'state TEXT DEFAULT Menu,' \
+                f'score INTEGER DEFAULT 1, ' \
+                f'gauge TEXT DEFAULT None, ' \
+                f'most_points INTEGER DEFAULT 0,' \
                 f'mode TEXT DEFAULT None, ' \
                 f'submode TEXT DEFAULT None, ' \
                 f'cities_held TEXT DEFAULT None, ' \
                 f'hint TEXT DEFAULT None, ' \
                 f'right_answer TEXT DEFAULT None, ' \
-                f'rating_finished INTEGER DEFAULT 0, ' \
-                f'state TEXT DEFAULT menu,' \
-                f'score INTEGER DEFAULT 1, ' \
+                f'documentation TEXT DEFAULT None, ' \
                 f'glasses INTEGER DEFAULT 0, ' \
-                f'most_points INTEGER DEFAULT 0,' \
                 f'service_error INTEGER DEFAULT 0)'
     execute_query(sql_query)
 
@@ -70,17 +71,18 @@ def get_all_rows(table_name):
             "id": row[0],
             "user_id": row[1],
             "user_name": row[2],
-            "mode": row[3],
-            "submode": row[4],
-            "cities_held": row[5],
-            "hint": row[6],
-            "right_answer": row[7],
-            "rating_finished": row[8],
-            "state": row[9],
-            "score": row[10],
-            "glasses": row[11],
-            "most_points": row[12],
-            "service_error": row[13]
+            "state": row[3],
+            "score": row[4],
+            "gauge": row[5],
+            "most_points": row[6],
+            "mode": row[7],
+            "submode": row[8],
+            "cities_held": row[9],
+            "hint": row[10],
+            "right_answer": row[11],
+            "documentation": row[12],
+            "glasses": row[13],
+            "service_error": row[14]
         }
 
     return users
@@ -133,17 +135,16 @@ def update_row_value(user_id, column_name, new_value):
 # Функция для получения данных для указанного пользователя
 def get_data_for_user(user_id):
     if is_value_in_table(DB_TABLE_USERS_NAME, "user_id", user_id):
-        sq1_query = (f"SELECT user_id, user_name, mode, submode, cities_held, hint, right_answer, rating_finished, "
-                     f"state, score, glasses, most_points, service_error FROM {DB_TABLE_USERS_NAME} "
+        sq1_query = (f"SELECT user_id, user_name, state, score, gauge, most_points, mode, submode, cities_held, hint, right_answer, documentation, "
+                     f"glasses, service_error FROM {DB_TABLE_USERS_NAME} "
                      f"WHERE user_id = ? limit 1")
         row = execute_selection_query(sq1_query, [user_id])[0]
-        return {"user_id": row[0], "user_name": row[1], "mode": row[2], "submode": row[3], "cities_held": row[4],
-                "hint": row[5], "right_answer": row[6], "rating_finished": row[7], "state": row[8], "score": row[9],
-                "glasses": row[10], "most_points": row[11], "service_error": row[12]}
+        return {"user_id": row[0], "user_name": row[1], "state": row[2], "score": row[3], "gauge": row[4], "most_points": row[5], "mode": row[6], "submode": row[7], "cities_held": row[8],
+                "hint": row[9], "right_answer": row[10], "documentation": row[11], "glasses": row[12], "service_error": row[13]}
     else:
         logging.info(f"DATABASE: Пользователь с id = {user_id} не найден")
-        return {"user_id": "", "user_name": "", "mode": "", "submode": "", "cities_held": "", "hint": "",
-                "right_answer": "", "rating_finished": "", "state": "", "score": "", "glasses": "", "most_points": "",
+        return {"user_id": "", "user_name": "", "state": "", "score": "", "gauge": "", "most_points": "", "mode": "", "submode": "", "cities_held": "", "hint": "",
+                "right_answer": "", "documentation": "", "glasses": "",
                 "service_error": ""}
 
 # Функция обнуляет значение для указанного пользователя
@@ -151,8 +152,8 @@ def reset_table_value(user_id):
     if is_value_in_table(DB_TABLE_USERS_NAME, "user_id", user_id):
         sql_query = (
             f"UPDATE {DB_TABLE_USERS_NAME} "
-            f"SET mode = NULL, submode = NULL, cities_held = NULL, hint = NULL, right_answer = NULL, rating_finished = 0, "
-            f"state = 'menu', score = 1, glasses = 0 WHERE user_id = ?"
+            f"SET state = 'Menu', score = 1, gauge = NULL, mode = NULL, submode = NULL, cities_held = NULL, hint = NULL, right_answer = NULL, documentation = NULL, "
+            f"glasses = 0 WHERE user_id = ?"
         )
         execute_query(sql_query, [user_id])
     else:
