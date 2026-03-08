@@ -1,7 +1,7 @@
 import random
 from photo import *
 
-BOT_TOKEN = "8262707935:AAF7u55l24p_vZRzs06BOETWlMVKvDAbKOg"
+BOT_TOKEN = ""
 
 user_data = {}
 user_collection = {}
