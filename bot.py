@@ -89,7 +89,6 @@ def send_question(uid, text, separation, callback_id):
     result = next_round(uid)
     if not result:
         bot.send_message(uid, "Завершение игры.", reply_markup=create_markup(["🚪 Выйти"]))
-        bot.answer_callback_query(callback_id)
         return
 
     if get_data_for_user(uid)["score"] > 1:
@@ -111,7 +110,6 @@ def send_question(uid, text, separation, callback_id):
         caption=f"{indicator}. {text}",
         reply_markup=create_markup(buttons, separation)
     )
-    bot.answer_callback_query(callback_id)
 
 def start_game(callback, mode, submode=None):
     uid = callback.from_user.id
@@ -181,6 +179,32 @@ def leader_command(message):
     )
 
     bot.send_message(uid, f"🏆 Таблица лидеров:\n\n{text}")
+
+@bot.message_handler(commands=["repeat"])
+def repeat (message):
+    uid = message.from_user.id
+    state = get_data_for_user(uid)["state"]
+    data = get_data_for_user(uid)
+
+    if not check_user(message):
+        return
+
+    if state != "Game":
+        bot.answer_callback_query(message.id, "Сначала выберите режим в меню!", show_alert=True)
+        return
+
+    texts = {
+        "City": "Укажите верный город!",
+        "Gerb": "Укажите верный герб!",
+        "Attractions": "Укажите верную достопримечательность!"
+    }
+
+    separation = {
+        "City": 2,
+        "Gerb": 2,
+        "Attractions": 1
+    }
+    send_question(uid, texts[data["mode"]], separation[data["mode"]], message)
 
 
 @bot.callback_query_handler(func=lambda c: c.data == '⭐ Список лидеров')
@@ -488,7 +512,6 @@ def answers(callback):
                 update_row_value(uid, "glasses", data["glasses"] + 10)
 
             if data["mode"] == "Attractions" and data["submode"] == "Sightseeing_tour":
-
                 bot.send_message(
                     uid,
                     f'{data["documentation"]}',
