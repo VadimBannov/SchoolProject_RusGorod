@@ -13,9 +13,9 @@ class Gerb(ImageEntity):
     pass
 
 class Attractions(ImageEntity):
-    def __init__(self, name, photo_path, information_path):
+    def __init__(self, name, photo_path, information):
         super().__init__(name, photo_path)
-        self.information_path = information_path
+        self.information_path = information
 
 cities = {
     "Москва": City("Москва", "Photo/Images/Moscow.jpg", "Photo/Maps/MoscowMap.jpg"),
@@ -47,7 +47,7 @@ cities = {
     "Астрахань": City("Астрахань", "Photo/Images/Astrakhan.jpg", "Photo/Maps/AstrakhanMap.jpg"),
     "Пенза": City("Пенза", "Photo/Images/Penza.jpg", "Photo/Maps/PenzaMap.jpg"),
     "Норильск": City("Норильск", "Photo/Images/Norilsk.jpg", "Photo/Maps/NorilskMap.jpg"),
-    "Набер-ные Челны": City("Набер-ные Челны", "Photo/Images/Naberezhnye_Chelny.jpg", "Photo/Maps/Naberezhnye_ChelnyMap.jpg"),
+    "Набережн. Челны": City("Набережн. Челны", "Photo/Images/Naberezhnye_Chelny.jpg", "Photo/Maps/Naberezhnye_ChelnyMap.jpg"),
     "Липецк": City("Липецк", "Photo/Images/Lipetsk.png", "Photo/Maps/LipetskMap.jpg"),
     "Киров": City("Киров", "Photo/Images/Kirov.jpg", "Photo/Maps/KirovMap.jpg"),
     "Чебоксары": City("Чебоксары", "Photo/Images/Cheboksary.jpg", "Photo/Maps/CheboksaryMap.jpg"),
@@ -61,7 +61,7 @@ cities = {
     "Калининград": City("Калининград", "Photo/Images/Kaliningrad.jpg", "Photo/Maps/KaliningradMap.jpg"),
     "Курск": City("Курск", "Photo/Images/Kursk.jpg", "Photo/Maps/KurskMap.jpg"),
     "Вологда": City("Вологда", "Photo/Images/Vologda.jpg", "Photo/Maps/VologdaMap.jpg"),
-    "Великий Новгород": City("Великий Новгород", "Photo/Images/Veliky_Novgorod.jpg", "Photo/Maps/Veliky_NovgorodMap.jpg"),
+    "Вел. Новгород": City("Вел. Новгород", "Photo/Images/Veliky_Novgorod.jpg", "Photo/Maps/Veliky_NovgorodMap.jpg"),
     "Орёл": City("Орёл", "Photo/Images/Eagle.jpg", "Photo/Maps/EagleMap.jpg"),
     "Мурманск": City("Мурманск", "Photo/Images/Murmansk.jpg", "Photo/Maps/MurmanskMap.jpg"),
     "Краснодон": City("Краснодон", "Photo/Images/Krasnodon.jpg", "Photo/Maps/KrasnodonMap.jpg"),
@@ -83,7 +83,7 @@ gerbs = {
     "Новосибирск": Gerb("Новосибирск", "Photo/Gerbs/Novosibirsk.jpg"),
     "Ростов-на-Дону": Gerb("Ростов-на-Дону", "Photo/Gerbs/Rostov-on-Don.jpg"),
     "Уфа": Gerb("Уфа", "Photo/Gerbs/Ufa.jpg"),
-    "Красноярск": Gerb("Красноярск", "Photo/Gerbs/Krasnodar.jpg"),
+    "Красноярск": Gerb("Красноярск", "Photo/Gerbs/Krasnoyarsk.jpg"),
     "Пермь": Gerb("Пермь", "Photo/Gerbs/Perm.jpg"),
     "Воронеж": Gerb("Воронеж", "Photo/Gerbs/Voronezh.jpg"),
     "Волгоград": Gerb("Волгоград", "Photo/Gerbs/Volgograd.jpg"),
@@ -121,7 +121,7 @@ attractions = {
     "Дом-музей Ленина": Attractions("Дом-музей Ленина", "Photo/Attractions/House_Museum.jpg", "Дом-музей Ленина — Ульяновск\nНаходится в историческом центре; мемориальный дом, посвящённый семье Ульяновых.\nИнтересные факты:\n1) Музей сохраняет быт и предметы эпохи, связанные с молодыми годами Ленина.\n2) Экспозиции помогают проследить социальный и культурный контекст конца XIX — начала XX века.\n3) Место служит образовательной площадкой для изучения истории революционного периода."),
     "Заповедник «Столбы»": Attractions("Заповедник «Столбы»", "Photo/Attractions/Nature_Reserve.jpg", "Красноярск — Заповедник «Столбы»\nНаходится в национальном парке «Красноярские Столбы».\nИнтересные факты:\n1) Уникальные скальные образования.\n2) Популярны среди туристов и альпинистов.\n3) Являются природным символом региона."),
     "Музей «Гото Предестинация»": Attractions("Музей «Гото Предестинация»", "Photo/Attractions/Goto_Predestination.jpg", "Музей «Гото Предестинация» (корабль-музей) — Воронеж\nРасположен на берегу; музей-реконструкция парусного судна XVII века.\nИнтересные факты:\n1) Корабль воссоздаёт тип парусного судна, который использовался при становлении российского флота.\n2) Экспозиция посвящена истории судостроения Петра I и раннего флота России.\n3) На палубе проводятся экскурсии, образовательные программы и исторические реконструкции."),
-    "Парк Галицкого": Attractions("Парк Галицкого", "Photo/Attractions/Galitsky_Park.jpg", "Челябинск — Парк Гагарина\nНаходится в Челябинске, в центре города.\nИнтересные факты:\n1) Один из крупнейших парков Южного Урала.\n2) Открыт в 1934 году.\n3) Популярное место отдыха горожан."),
+    "Парк Гагарина": Attractions("Парк Гагарина", "Photo/Attractions/Gagarin Park.jpeg", "Челябинск — Парк Гагарина\nНаходится в Челябинске, в центре города.\nИнтересные факты:\n1) Один из крупнейших парков Южного Урала.\n2) Открыт в 1934 году.\n3) Популярное место отдыха горожан."),
     "Мост Влюблённых": Attractions("Мост Влюблённых", "Photo/Attractions/Bridge_Lovers.jpg", "Тюмень — Мост Влюблённых\nНаходится в Тюмени, через реку Тура.\nИнтересные факты:\n1) Пешеходный мост в центре города.\n2) Популярен среди молодожёнов.\n3) Красиво подсвечивается вечером."),
     "Памятник «Первопоселенец»": Attractions("Памятник «Первопоселенец»", "Photo/Attractions/Monument_Pioneer_Settler.jpg", "Памятник «Первопоселенец» — Пенза\nУстановлен в городском парке как символ основания и ранних поселенцев.\nИнтересные факты:\n1) Посвящён первым поселенцам и формированию городской общины в XVII—XVIII вв.\n2) Служит популярным местом для встреч и городских фотосессий.\n3) Вокруг памятника регулярно проходят культурные и патриотические мероприятия."),
     "Русский мост": Attractions("Русский мост", "Photo/Attractions/Russian_bridge.jpg", "Владивосток — Русский мост\nНаходится во Владивостоке, через пролив Босфор Восточный.\nИнтересные факты:\n1) Один из самых длинных вантовых мостов в мире.\n2) Построен к саммиту АТЭС 2012 года.\n3) Соединяет остров Русский с материком."),

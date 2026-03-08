@@ -1,7 +1,7 @@
 import random
 from photo import *
 
-BOT_TOKEN = ""
+BOT_TOKEN = "8262707935:AAGa_iQkMykliY82q5l0Fzy9yuchX9AvZaU"
 
 user_data = {}
 user_collection = {}
@@ -10,7 +10,7 @@ DB_DIR = 'db'
 DB_NAME = 'user database.db'
 DB_TABLE_USERS_NAME = 'users'
 
-SYSTEM_BUTTONS = {
+SYSTEM_BUTTONS = [
     "🚪 Выйти",
     "🏁 Завершить",
     "💡 Подсказка",
@@ -24,7 +24,7 @@ SYSTEM_BUTTONS = {
     "🏛 Достопримечательности",
     "🎲 Случайный режим",
     "✈️ Экскурсионный"
-}
+]
 
 DOCUMENTATION = (f"🇷🇺 РусГород — это познавательная игра, посвящённая городам России. \n\n"
                  f"В проекте вы можете:\n"
@@ -54,18 +54,13 @@ RANDOM_MODES = [
 # Передает изображение и кнопки
 def uploading_photos_buttons(received_elements, actual_mode, submode):
     storage_mode = ""
-    get_image = ""
-
 
     if actual_mode == "City": # Проверяет пользовательский режим
         storage_mode = cities
-        get_image = lambda obj: obj.photo_path
     elif actual_mode == "Gerb":
         storage_mode = gerbs
-        get_image = lambda obj: obj.photo_path
     elif actual_mode == "Attractions":
         storage_mode = attractions
-        get_image = lambda obj: obj.photo_path
 
     if submode != "Rating": # Проверяет есть ли подрежим Рейтинг
         available = [
@@ -87,7 +82,7 @@ def uploading_photos_buttons(received_elements, actual_mode, submode):
     options = wrong_names + [correct_name] # Добавляется правильный элемент
     random.shuffle(options) # Перемешивает
 
-    with open(get_image(correct_obj), "rb") as f: # Читает файлы
+    with open(correct_obj.photo_path, "rb") as f: # Читает файлы
         image_bytes = f.read()
 
     if actual_mode == "City":
@@ -96,9 +91,12 @@ def uploading_photos_buttons(received_elements, actual_mode, submode):
     else:
         map_bytes = None
 
-
     if submode == "Sightseeing_tour":
         information = correct_obj.information_path
+
+        if callable(information):
+            information = information()
+
     else:
         information = None
 
