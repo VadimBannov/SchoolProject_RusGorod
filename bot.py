@@ -22,7 +22,7 @@ logging.basicConfig(
 # -------------------- ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ --------------------
 
 # Показывает пользователю "⏳ Обрабатываю..." только если обработка долго выполняется
-def delayed_answer(callback_id, delay=2):
+def delayed_answer(callback_id, delay=10):
     def send():
         try:
             bot.answer_callback_query(callback_id, "⏳ Обрабатываю...")
@@ -288,18 +288,31 @@ def arcade(callback):
     state = get_data_for_user(uid)["state"]
     mode = get_data_for_user(uid)["mode"]
 
-    if not check_user(callback):
-        return
+    timer = delayed_answer(callback.id, delay=10)
 
-    if state != "Menu":
-        bot.answer_callback_query(callback.id, "Сначала завершите текущую игру!", show_alert=True)
-        return
+    try:
+        if not check_user(callback):
+            timer.cancel()
+            bot.answer_callback_query(callback.id)
+            return
 
-    if mode == "City":
-        start_game(callback, "City", "Arcade")
-    elif mode == "Attractions":
-        start_game(callback, "Attractions", "Arcade")
+        if state != "Menu":
+            bot.answer_callback_query(callback.id, "Сначала завершите текущую игру!", show_alert=True)
+            timer.cancel()
+            bot.answer_callback_query(callback.id)
+            return
 
+        if mode == "City":
+            start_game(callback, "City", "Arcade")
+        elif mode == "Attractions":
+            start_game(callback, "Attractions", "Arcade")
+        timer.cancel()
+        bot.answer_callback_query(callback.id)
+
+    except Exception as e:
+        timer.cancel()
+        bot.send_message(uid, "Ошибка! Напишите /repeat для продолжения игры.")
+        raise e
 
 @bot.callback_query_handler(func=lambda c: c.data == "🏆 Рейтинг")
 def rating(callback):
@@ -307,14 +320,28 @@ def rating(callback):
     uid = callback.from_user.id
     state = get_data_for_user(uid)["state"]
 
-    if not check_user(callback):
-        return
+    timer = delayed_answer(callback.id, delay=10)
 
-    if state != "Menu":
-        bot.answer_callback_query(callback.id, "Сначала завершите текущую игру!", show_alert=True)
-        return
+    try:
+        if not check_user(callback):
+            timer.cancel()
+            bot.answer_callback_query(callback.id)
+            return
 
-    start_game(callback, "City", "Rating")
+        if state != "Menu":
+            bot.answer_callback_query(callback.id, "Сначала завершите текущую игру!", show_alert=True)
+            timer.cancel()
+            bot.answer_callback_query(callback.id)
+            return
+
+        start_game(callback, "City", "Rating")
+        timer.cancel()
+        bot.answer_callback_query(callback.id)
+
+    except Exception as e:
+        timer.cancel()
+        bot.send_message(uid, "Ошибка! Напишите /repeat для продолжения игры.")
+        raise e
 
 @bot.callback_query_handler(func=lambda c: c.data == "✈️ Экскурсионный")
 def sightseeing_tour(callback):
@@ -322,14 +349,28 @@ def sightseeing_tour(callback):
     uid = callback.from_user.id
     state = get_data_for_user(uid)["state"]
 
-    if not check_user(callback):
-        return
+    timer = delayed_answer(callback.id, delay=10)
 
-    if state != "Menu":
-        bot.answer_callback_query(callback.id, "Сначала завершите текущую игру!", show_alert=True)
-        return
+    try:
+        if not check_user(callback):
+            timer.cancel()
+            bot.answer_callback_query(callback.id)
+            return
 
-    start_game(callback, "Attractions", "Sightseeing_tour")
+        if state != "Menu":
+            bot.answer_callback_query(callback.id, "Сначала завершите текущую игру!", show_alert=True)
+            timer.cancel()
+            bot.answer_callback_query(callback.id)
+            return
+
+        start_game(callback, "Attractions", "Sightseeing_tour")
+        timer.cancel()
+        bot.answer_callback_query(callback.id)
+
+    except Exception as e:
+        timer.cancel()
+        bot.send_message(uid, "Ошибка! Напишите /repeat для продолжения игры.")
+        raise e
 
 @bot.callback_query_handler(func=lambda c: c.data == "💼Следующий вопрос")
 def next_question(callback):
@@ -337,26 +378,39 @@ def next_question(callback):
     uid = callback.from_user.id
     data = get_data_for_user(uid)
 
-    if not check_user(callback):
-        return
+    timer = delayed_answer(callback.id, delay=10)
 
-    if data["state"] != "Game":
-        bot.answer_callback_query(callback.id, "Сначала выберите режим в меню!", show_alert=True)
-        return
+    try:
+        if not check_user(callback):
+            return
 
-    texts = {
-        "City": "Укажите верный город!",
-        "Gerb": "Укажите верный герб!",
-        "Attractions": "Укажите верную достопримечательность!"
-    }
+        if data["state"] != "Game":
+            bot.answer_callback_query(callback.id, "Сначала выберите режим в меню!", show_alert=True)
+            timer.cancel()
+            bot.answer_callback_query(callback.id)
+            return
 
-    separation = {
-        "City": 2,
-        "Gerb": 2,
-        "Attractions": 1
-    }
+        texts = {
+            "City": "Укажите верный город!",
+            "Gerb": "Укажите верный герб!",
+            "Attractions": "Укажите верную достопримечательность!"
+        }
 
-    send_question(uid, texts[data["mode"]], separation[data["mode"]],  callback.id)
+        separation = {
+            "City": 2,
+            "Gerb": 2,
+            "Attractions": 1
+        }
+
+        send_question(uid, texts[data["mode"]], separation[data["mode"]],  callback.id)
+        timer.cancel()
+        bot.answer_callback_query(callback.id)
+
+    except Exception as e:
+        timer.cancel()
+        bot.send_message(uid, "Ошибка! Напишите /repeat для продолжения игры.")
+        raise e
+
 
 @bot.callback_query_handler(func=lambda c: c.data == "🛡 Гербы")
 def gerbs(callback):
@@ -364,17 +418,28 @@ def gerbs(callback):
     uid = callback.from_user.id
     state = get_data_for_user(uid)["state"]
 
-    update_row_value(uid, "mode", "Gerb")
+    timer = delayed_answer(callback.id, delay=10)
 
-    if not check_user(callback):
-        return
+    try:
+        update_row_value(uid, "mode", "Gerb")
 
-    if state != "Menu":
-        bot.answer_callback_query(callback.id, "Сначала завершите текущую игру!", show_alert=True)
-        return
+        if not check_user(callback):
+            timer.cancel()
+            bot.answer_callback_query(callback.id)
+            return
 
-    start_game(callback, "Gerb")
+        if state != "Menu":
+            bot.answer_callback_query(callback.id, "Сначала завершите текущую игру!", show_alert=True)
+            return
 
+        start_game(callback, "Gerb")
+        timer.cancel()
+        bot.answer_callback_query(callback.id)
+
+    except Exception as e:
+        timer.cancel()
+        bot.send_message(uid, "Ошибка! Напишите /repeat для продолжения игры.")
+        raise e
 
 @bot.callback_query_handler(func=lambda c: c.data == "🏛 Достопримечательности")
 def attractions(callback):
@@ -403,39 +468,53 @@ def random_mode(callback):
     uid = callback.from_user.id
     state = get_data_for_user(uid)["state"]
 
-    if not check_user(callback):
-        return
+    timer = delayed_answer(callback.id, delay=10)
 
-    if state != "Menu":
-        bot.answer_callback_query(callback.id, "Сначала завершите текущую игру!", show_alert=True)
-        return
+    try:
+        if not check_user(callback):
+            timer.cancel()
+            bot.answer_callback_query(callback.id)
+            return
 
-    mode, submode = random.choice(RANDOM_MODES)  # Выбирает случайный режим
+        if state != "Menu":
+            bot.answer_callback_query(callback.id, "Сначала завершите текущую игру!", show_alert=True)
+            timer.cancel()
+            bot.answer_callback_query(callback.id)
+            return
 
-    # Сохраняет режим в БД
-    update_row_value(uid, "mode", mode)
-    update_row_value(uid, "submode", submode)
+        mode, submode = random.choice(RANDOM_MODES)  # Выбирает случайный режим
 
-    # Сообщение о том, какой режим выпал
-    mode_names = {
-        "City": "🏙 Города",
-        "Gerb": "🛡 Гербы",
-        "Attractions": "🏛 Достопримечательности"
-    }
+        # Сохраняет режим в БД
+        update_row_value(uid, "mode", mode)
+        update_row_value(uid, "submode", submode)
 
-    # Для Городов показываем и подрежим
-    if mode == "City":
-        submode_names = {"Arcade": "Аркадный", "Rating": "Рейтинг"}
-        bot.send_message(uid, f"🎲 Случайный режим! Выпал режим: {mode_names[mode]} — {submode_names.get(submode, submode)}")
-    elif mode == "Attractions":
-        submode_names = {"Arcade": "Аркадный", "Sightseeing_tour": "Экскурсионный"}
-        bot.send_message(uid,
-                         f"🎲 Случайный режим! Выпал режим: {mode_names[mode]} — {submode_names.get(submode, submode)}")
-    else:
-        bot.send_message(uid, f"🎲 Случайный режим! Выпал режим: {mode_names.get(mode, mode)}")
+        # Сообщение о том, какой режим выпал
+        mode_names = {
+            "City": "🏙 Города",
+            "Gerb": "🛡 Гербы",
+            "Attractions": "🏛 Достопримечательности"
+        }
 
-    # Запускает игру
-    start_game(callback, mode, submode)
+        # Для Городов показываем и подрежим
+        if mode == "City":
+            submode_names = {"Arcade": "Аркадный", "Rating": "Рейтинг"}
+            bot.send_message(uid, f"🎲 Случайный режим! Выпал режим: {mode_names[mode]} — {submode_names.get(submode, submode)}")
+        elif mode == "Attractions":
+            submode_names = {"Arcade": "Аркадный", "Sightseeing_tour": "Экскурсионный"}
+            bot.send_message(uid,
+                             f"🎲 Случайный режим! Выпал режим: {mode_names[mode]} — {submode_names.get(submode, submode)}")
+        else:
+            bot.send_message(uid, f"🎲 Случайный режим! Выпал режим: {mode_names.get(mode, mode)}")
+
+        # Запускает игру
+        start_game(callback, mode, submode)
+        timer.cancel()
+        bot.answer_callback_query(callback.id)
+
+    except Exception as e:
+        timer.cancel()
+        bot.send_message(uid, "Ошибка! Напишите /repeat для продолжения игры.")
+        raise e
 
 @bot.callback_query_handler(func=lambda c: c.data in ["🏁 Завершить", "🚪 Выйти"])
 def finish(callback):
@@ -496,11 +575,13 @@ def answers(callback):
     if not check_user(callback):
         return
 
-    timer = delayed_answer(callback.id, delay=2)
+    timer = delayed_answer(callback.id, delay=10)
 
     try:
         if state != "Game":
             bot.answer_callback_query(callback.id, "Сначала выберите режим в меню!", show_alert=True)
+            timer.cancel()
+            bot.answer_callback_query(callback.id)
             return
 
         data = get_data_for_user(uid)
@@ -516,6 +597,8 @@ def answers(callback):
                     uid,
                     f'{data["documentation"]}',
                     reply_markup=create_markup(["💼Следующий вопрос", "🚪 Выйти"], 1))
+                timer.cancel()
+                bot.answer_callback_query(callback.id)
                 return
 
             texts = {
@@ -538,6 +621,8 @@ def answers(callback):
                     update_row_value(uid, "most_points", data["glasses"])
 
                 finish(callback)
+                timer.cancel()
+                bot.answer_callback_query(callback.id)
                 return
             else:
                 bot.send_message(uid, "❌ Неверно. Попробуйте ещё раз.")
@@ -547,7 +632,7 @@ def answers(callback):
 
     except Exception as e:
         timer.cancel()
-        bot.answer_callback_query(callback.id, "Ошибка!")
+        bot.send_message(uid, "Ошибка! Напишите /repeat для продолжения игры.")
         raise e
 
 # -------------------- POLLING --------------------
